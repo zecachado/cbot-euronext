@@ -489,12 +489,6 @@
   var fmt2 = new Intl.NumberFormat("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   var fmt4 = new Intl.NumberFormat("pt-PT", { minimumFractionDigits: 4, maximumFractionDigits: 4 });
 
-  function fmtBu(v) {
-    var s = v.toFixed(4);
-    s = s.replace(/0+$/, "").replace(/\.$/, "");
-    return s;
-  }
-
   function cbotToEurPerTon(value, commodity) {
     return (value * FACTORS[commodity]) / state.eurusd;
   }
@@ -515,7 +509,7 @@
       return '<tr class="' + groupClass(state.chicago, idx, "name").trim() + '">' +
         '<td class="crop">' + c.name + "</td>" +
         '<td class="contract">' + c.contract + "</td>" +
-        '<td class="value gold">' + fmtBu(c.value) + "</td>" +
+        '<td class="value gold">' + fmt4.format(c.value) + "</td>" +
         '<td class="value">' + fmt2.format(eurT) + "</td>" +
         "</tr>";
     }).join("");
