@@ -1,0 +1,687 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CBOT × Euronext</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌾</text></svg>">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --paper: #ecefe2;
+    --surface: #ffffff;
+    --surface-2: #e1e4d5;
+    --ink: #1b2116;
+    --muted: #5c6552;
+    --line: #d3d7c5;
+    --gold: #a9782b;
+    --gold-ink: #ffffff;
+    --blue: #2f5170;
+    --blue-ink: #ffffff;
+    --moss: #4d6a3f;
+    --moss-ink: #ffffff;
+    --good: #1e8e5a;
+    --bad: #c0392b;
+    --crop-milho: #a9782b;
+    --crop-trigo: #8c6239;
+    --crop-soja: #4d6a3f;
+    --crop-colza: #8a3b6b;
+    --sima: #1f7a6c;
+    --sima-ink: #ffffff;
+    --shadow: 0 1px 2px rgba(20, 24, 14, 0.06), 0 6px 20px rgba(20, 24, 14, 0.06);
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #13160d;
+      --surface: #1b2016;
+      --surface-2: #232a1c;
+      --ink: #e9ebdd;
+      --muted: #9ba38c;
+      --line: #2e362a;
+      --gold: #d9a94a;
+      --gold-ink: #241804;
+      --blue: #7fa3c4;
+      --blue-ink: #0d1a22;
+      --moss: #8ab873;
+      --moss-ink: #16220f;
+      --good: #4cba82;
+      --bad: #e2685a;
+      --crop-milho: #d9a94a;
+      --crop-trigo: #c99a63;
+      --crop-soja: #8ab873;
+      --crop-colza: #c77fae;
+      --sima: #4fbfab;
+      --sima-ink: #0a2320;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #13160d;
+    --surface: #1b2016;
+    --surface-2: #232a1c;
+    --ink: #e9ebdd;
+    --muted: #9ba38c;
+    --line: #2e362a;
+    --gold: #d9a94a;
+    --gold-ink: #241804;
+    --blue: #7fa3c4;
+    --blue-ink: #0d1a22;
+    --moss: #8ab873;
+    --moss-ink: #16220f;
+    --good: #4cba82;
+    --bad: #e2685a;
+    --crop-milho: #d9a94a;
+    --crop-trigo: #c99a63;
+    --crop-soja: #8ab873;
+    --crop-colza: #c77fae;
+    --sima: #4fbfab;
+    --sima-ink: #0a2320;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  header.top {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 4px 2px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-size: 27px;
+    margin: 0;
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+  }
+
+  .updated-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+
+  .updated-text { font-size: 12.5px; color: var(--muted); }
+  .updated-text strong { color: var(--ink); font-weight: 500; }
+
+  .eurusd-pill {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 3px 10px;
+    color: var(--ink);
+  }
+  .eurusd-pill span { color: var(--muted); }
+
+  button.ghost {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    background: none;
+    border: 1px solid var(--line);
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 5px 11px;
+    cursor: pointer;
+  }
+  button.ghost:hover { border-color: var(--gold); color: var(--gold); }
+  button.ghost:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  .boards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 16px;
+    align-items: start;
+  }
+
+  .board {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .board-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .board-head h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 15.5px;
+    margin: 0;
+  }
+
+  .exchange-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .exchange-tag.blue { background: color-mix(in srgb, var(--blue) 16%, transparent); color: var(--blue); }
+  .exchange-tag.gold { background: color-mix(in srgb, var(--gold) 18%, transparent); color: var(--gold); }
+  .exchange-tag.sima { background: color-mix(in srgb, var(--sima) 18%, transparent); color: var(--sima); }
+  .exchange-tag.moss { background: color-mix(in srgb, var(--moss) 18%, transparent); color: var(--moss); }
+
+  .board-scroll { overflow-x: auto; }
+
+  table.board-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+  }
+  table.board-table th {
+    text-align: right;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--muted);
+    font-weight: 500;
+    padding: 7px 6px;
+    border-bottom: 1px solid var(--line);
+    overflow-wrap: break-word;
+  }
+  table.board-table th:first-child, table.board-table td:first-child { text-align: left; }
+  table.board-table td {
+    padding: 7px 6px;
+    border-bottom: 1px solid var(--line);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+  table.board-table tr:last-child td { border-bottom: none; }
+  table.board-table tr.group-start td { border-top: 2px solid var(--muted); }
+  table.board-table td.crop { text-align: left; color: var(--ink); font-weight: 500; }
+  table.board-table td.contract { text-align: left; color: var(--muted); font-size: 11px; white-space: nowrap; }
+  table.board-table td.local-cell { text-align: left; color: var(--muted); font-size: 10.5px; white-space: normal; line-height: 1.35; }
+  table.board-table td.value { color: var(--ink); font-weight: 600; white-space: nowrap; }
+  table.board-table td.value.gold { color: var(--gold); }
+  table.board-table td.value.blue { color: var(--blue); }
+  table.board-table td.value.moss { color: var(--moss); }
+  table.board-table td.value.sima { color: var(--sima); }
+  table.board-table td.muted-cell { color: var(--muted); font-weight: 400; font-style: italic; font-size: 10.5px; white-space: normal; }
+
+  .board-note {
+    font-size: 11px;
+    color: var(--muted);
+    padding: 8px 12px 10px;
+    line-height: 1.4;
+  }
+
+  .mini-chart { padding: 10px 12px 4px; border-top: 1px solid var(--line); }
+  .mini-chart svg { width: 100%; height: auto; display: block; }
+  .mini-chart text { font-family: 'IBM Plex Mono', monospace; fill: var(--muted); }
+  .mini-chart .mark-value { font-size: 8px; font-weight: 600; }
+
+  section { display: flex; flex-direction: column; gap: 10px; }
+  .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  h2 { font-family: 'Fraunces', serif; font-weight: 500; font-size: 16.5px; margin: 0; }
+  .section-note { font-size: 11.5px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
+
+  .legend-row {
+    display: flex; gap: 14px; padding: 8px 4px 2px;
+    font-size: 11px; color: var(--muted); font-family: 'IBM Plex Mono', monospace;
+  }
+  .legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
+  .legend-row { align-items: center; row-gap: 6px; }
+
+  .note-card {
+    background: var(--surface-2);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .note-card strong { color: var(--ink); }
+
+  .fx-card {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 9%, var(--surface)), var(--surface));
+    border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--line));
+    border-radius: 12px;
+    padding: 16px 14px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .fx-card h2 { color: var(--gold); }
+
+  .fx-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .fx-field { display: flex; flex-direction: column; gap: 4px; }
+  .fx-field label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  .fx-field input, .fx-field select {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 8px;
+    color: var(--ink);
+    width: 100%;
+  }
+  .fx-field input:focus-visible, .fx-field select:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+
+  .fx-result {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 25px;
+    font-variant-numeric: tabular-nums;
+    text-wrap: balance;
+  }
+  .fx-result span { color: var(--gold); }
+  .fx-result-note { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  details.install {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  details.install summary {
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--blue);
+    letter-spacing: 0.02em;
+  }
+  details.install ol {
+    margin: 10px 0 0;
+    padding-left: 18px;
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  details.install li strong { color: var(--ink); }
+
+  footer { text-align: center; font-size: 11px; color: var(--muted); padding-top: 4px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="top">
+    <span class="eyebrow">Cereais &amp; oleaginosas · quadro Chicago · Euronext · Físico</span>
+    <h1>CBOT × Euronext</h1>
+    <div class="updated-row">
+      <span class="updated-text">Atualizado <strong id="updated-date">—</strong></span>
+      <span class="eurusd-pill"><span>EUR/USD</span> <strong id="eurusd-value">—</strong></span>
+    </div>
+    <div class="updated-row">
+      <span class="updated-text">1 t milho = 39,368 bu · 1 t trigo/soja = 36,744 bu</span>
+      <button class="ghost" id="refresh-btn" type="button">↻ reler dados</button>
+    </div>
+  </header>
+
+  <div class="boards">
+
+    <div class="board">
+      <div class="board-head">
+        <h2>Chicago (CBOT)</h2>
+        <span class="exchange-tag gold">$/bushel</span>
+      </div>
+      <div class="board-scroll">
+        <table class="board-table">
+          <thead>
+            <tr><th style="width:26%">Cultura</th><th style="width:24%">Data</th><th style="width:25%">$/bu</th><th style="width:25%">€/t</th></tr>
+          </thead>
+          <tbody id="chicago-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="board">
+      <div class="board-head">
+        <h2>Euronext / MATIF</h2>
+        <span class="exchange-tag blue">€/t</span>
+      </div>
+      <div class="board-scroll">
+        <table class="board-table">
+          <thead>
+            <tr><th style="width:34%">Cultura</th><th style="width:32%">Data</th><th style="width:34%">€/t</th></tr>
+          </thead>
+          <tbody id="euronext-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="board">
+      <div class="board-head">
+        <h2>Físico</h2>
+        <span class="exchange-tag moss">€/t</span>
+      </div>
+      <div class="board-scroll">
+        <table class="board-table">
+          <thead>
+            <tr><th style="width:26%">Cultura</th><th style="width:50%">Praça</th><th style="width:24%">€/t</th></tr>
+          </thead>
+          <tbody id="fisico-body"></tbody>
+        </table>
+      </div>
+      <p class="board-note">Praças físicas francesas (Agritel + Terre-net) — referência europeia; não há cotação física diária pública para Portugal. "Trigo duro" é uma qualidade diferente do trigo mole cotado em Chicago/Euronext.</p>
+    </div>
+
+    <div class="board">
+      <div class="board-head">
+        <h2>SIMA (Portugal)</h2>
+        <span class="exchange-tag sima">€/T</span>
+      </div>
+      <div class="board-scroll">
+        <table class="board-table">
+          <thead>
+            <tr><th style="width:40%">Cereal</th><th style="width:36%">Porto</th><th style="width:24%">€/t</th></tr>
+          </thead>
+          <tbody id="sima-body"></tbody>
+        </table>
+      </div>
+      <div class="mini-chart">
+        <span class="section-note">últimos 3 meses (€/t, porto de Lisboa)</span>
+        <svg id="sima-history-svg" viewBox="0 0 400 190" role="img" aria-label="Evolução das cotações semanais do SIMA para cereais importados nos últimos três meses"></svg>
+        <div class="legend-row" id="sima-history-legend"></div>
+      </div>
+      <p class="board-note">Cereais importados, cotação semanal — fonte SIMA (GPP) / ACICO.</p>
+    </div>
+
+  </div>
+
+
+  <section>
+    <div class="section-head">
+      <h2>Conversor bushel → €/tonelada</h2>
+      <span class="exchange-tag gold">CBOT</span>
+    </div>
+    <div class="fx-card">
+      <div class="fx-row">
+        <div class="fx-field">
+          <label for="conv-value">$ por bushel</label>
+          <input id="conv-value" type="number" inputmode="decimal" value="5.3725" min="0" step="any">
+        </div>
+        <div class="fx-field">
+          <label for="conv-commodity">Produto</label>
+          <select id="conv-commodity"></select>
+        </div>
+      </div>
+      <div>
+        <div class="fx-result" id="conv-result">—</div>
+        <div class="fx-result-note" id="conv-formula"></div>
+      </div>
+    </div>
+  </section>
+
+  <details class="install">
+    <summary>Como pôr isto no ecrã principal do iPhone</summary>
+    <ol>
+      <li>Abre esta página no <strong>Safari</strong> (tem de ser o Safari)</li>
+      <li>Toca no ícone de <strong>Partilhar</strong> (quadrado com seta para cima)</li>
+      <li>Escolhe <strong>“Adicionar ao Ecrã Principal”</strong></li>
+      <li>Confirma — fica com ícone próprio, como uma app</li>
+    </ol>
+  </details>
+
+  <footer>Atualização automática a cada hora em horário de mercado (GitHub Actions) · fontes: Yahoo Finance, Agritel, Terre-net, SIMA/GPP · não é cotação em tempo real</footer>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var FACTORS = { corn: 39.36825, wheat: 36.7437, soybean: 36.7437 };
+  var COMMODITY_LABELS = { corn: "Milho", wheat: "Trigo", soybean: "Soja" };
+
+  var FALLBACK = {
+    updatedAt: "—",
+    eurusd: 1.16,
+    chicago: [],
+    euronext: [],
+    fisico: [],
+    sima: [],
+    simaHistory: []
+  };
+
+  var state = FALLBACK;
+
+  var fmt2 = new Intl.NumberFormat("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  var fmt4 = new Intl.NumberFormat("pt-PT", { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+
+  function fmtBu(v) {
+    var s = v.toFixed(4);
+    s = s.replace(/0+$/, "").replace(/\.$/, "");
+    return s;
+  }
+
+  function cbotToEurPerTon(value, commodity) {
+    return (value * FACTORS[commodity]) / state.eurusd;
+  }
+
+  function renderHeader() {
+    document.getElementById("updated-date").textContent = state.updatedAt;
+    document.getElementById("eurusd-value").textContent = fmt4.format(state.eurusd);
+  }
+
+  function groupClass(rows, idx, key) {
+    return idx > 0 && rows[idx][key] !== rows[idx - 1][key] ? " group-start" : "";
+  }
+
+  function renderChicago() {
+    var el = document.getElementById("chicago-body");
+    el.innerHTML = state.chicago.map(function (c, idx) {
+      var eurT = cbotToEurPerTon(c.value, c.commodity);
+      return '<tr class="' + groupClass(state.chicago, idx, "name").trim() + '">' +
+        '<td class="crop">' + c.name + "</td>" +
+        '<td class="contract">' + c.contract + "</td>" +
+        '<td class="value gold">' + fmtBu(c.value) + "</td>" +
+        '<td class="value">' + fmt2.format(eurT) + "</td>" +
+        "</tr>";
+    }).join("");
+  }
+
+  function renderEuronext() {
+    var el = document.getElementById("euronext-body");
+    el.innerHTML = state.euronext.map(function (e, idx) {
+      return '<tr class="' + groupClass(state.euronext, idx, "name").trim() + '">' +
+        '<td class="crop">' + e.name + "</td>" +
+        '<td class="contract">' + e.contract + "</td>" +
+        '<td class="value blue">' + fmt2.format(e.value) + "</td>" +
+        "</tr>";
+    }).join("");
+  }
+
+  function renderFisico() {
+    var el = document.getElementById("fisico-body");
+    el.innerHTML = state.fisico.map(function (f) {
+      var valueCell = (f.value === null || f.value === undefined)
+        ? '<td class="value muted-cell">s/ dado</td>'
+        : '<td class="value moss">' + fmt2.format(f.value) + "</td>";
+      return "<tr>" +
+        '<td class="crop">' + f.name + "</td>" +
+        '<td class="local-cell">' + f.local + "</td>" +
+        valueCell +
+        "</tr>";
+    }).join("");
+  }
+
+  function renderSima() {
+    var el = document.getElementById("sima-body");
+    var rows = state.sima || [];
+    el.innerHTML = rows.map(function (s) {
+      var valueCell = (s.value === null || s.value === undefined)
+        ? '<td class="value muted-cell">s/ dado</td>'
+        : '<td class="value sima">' + fmt2.format(s.value) + "</td>";
+      return "<tr>" +
+        '<td class="crop">' + s.name + "</td>" +
+        '<td class="local-cell">' + s.local + "</td>" +
+        valueCell +
+        "</tr>";
+    }).join("");
+  }
+
+  var SIMA_SERIES = [
+    { key: "milho", label: "Milho Forrageiro", color: "var(--sima)" },
+    { key: "cevada", label: "Cevada Forrageira", color: "var(--gold)" },
+    { key: "trigoForr", label: "Trigo Mole Forrageiro", color: "var(--blue)" },
+    { key: "trigoPanif", label: "Trigo Mole Panificável", color: "var(--crop-colza)" }
+  ];
+
+  function renderSimaHistory() {
+    var svg = document.getElementById("sima-history-svg");
+    var rows = state.simaHistory || [];
+    if (rows.length === 0) { svg.innerHTML = ""; return; }
+
+    var W = 400, H = 152, padL = 30, padR = 8, padT = 10, padB = 18;
+    var allVals = [];
+    rows.forEach(function (r) {
+      SIMA_SERIES.forEach(function (s) { if (r[s.key] !== null && r[s.key] !== undefined) allVals.push(r[s.key]); });
+    });
+    var vMin = Math.min.apply(null, allVals), vMax = Math.max.apply(null, allVals);
+    var vPad = (vMax - vMin) * 0.15 || 5;
+    vMin -= vPad; vMax += vPad;
+
+    function xScale(i) { return padL + (i / (rows.length - 1)) * (W - padL - padR); }
+    function yScale(v) { return H - padB - (v - vMin) / (vMax - vMin) * (H - padT - padB); }
+
+    var parts = [];
+    [vMin, (vMin + vMax) / 2, vMax].forEach(function (v) {
+      var y = yScale(v);
+      parts.push('<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padR) + '" y2="' + y + '" stroke="var(--line)" stroke-width="1" stroke-dasharray="2,3"></line>');
+      parts.push('<text x="' + (padL - 6) + '" y="' + (y + 3) + '" text-anchor="end" font-size="7.5">' + Math.round(v) + '</text>');
+    });
+
+    rows.forEach(function (r, i) {
+      if (i === 0 || i === rows.length - 1 || i % 3 === 0) {
+        parts.push('<text x="' + xScale(i) + '" y="' + (H - 6) + '" text-anchor="middle" font-size="7.5">S' + r.week + '</text>');
+      }
+    });
+
+    SIMA_SERIES.forEach(function (s) {
+      var pts = [];
+      rows.forEach(function (r, i) { if (r[s.key] !== null && r[s.key] !== undefined) pts.push({ i: i, v: r[s.key] }); });
+      if (pts.length === 0) return;
+
+      var segStart = 0;
+      for (var k = 1; k <= pts.length; k++) {
+        var broke = k === pts.length || pts[k].i !== pts[k - 1].i + 1;
+        if (broke) {
+          var seg = pts.slice(segStart, k);
+          if (seg.length >= 2) {
+            var d = seg.map(function (p, idx) { return (idx === 0 ? "M" : "L") + xScale(p.i) + " " + yScale(p.v); }).join(" ");
+            parts.push('<path d="' + d + '" fill="none" stroke="' + s.color + '" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>');
+          }
+          segStart = k;
+        }
+      }
+      pts.forEach(function (p) {
+        parts.push('<circle cx="' + xScale(p.i) + '" cy="' + yScale(p.v) + '" r="2" fill="' + s.color + '"></circle>');
+      });
+      var last = pts[pts.length - 1];
+      parts.push('<text class="mark-value" x="' + xScale(last.i) + '" y="' + (yScale(last.v) - 6) + '" text-anchor="end" fill="' + s.color + '">' + fmt2.format(last.v) + '</text>');
+    });
+
+    svg.innerHTML = parts.join("");
+
+    document.getElementById("sima-history-legend").innerHTML = SIMA_SERIES.map(function (s) {
+      return '<span><span class="legend-dot" style="background:' + s.color + '"></span>' + s.label + '</span>';
+    }).join("");
+  }
+
+  function populateConverter() {
+    var sel = document.getElementById("conv-commodity");
+    sel.innerHTML = Object.keys(COMMODITY_LABELS).map(function (k) {
+      return '<option value="' + k + '">' + COMMODITY_LABELS[k] + '</option>';
+    }).join("");
+    sel.value = "corn";
+  }
+
+  function renderConverter() {
+    var val = parseFloat(document.getElementById("conv-value").value) || 0;
+    var commodity = document.getElementById("conv-commodity").value;
+    var eurT = cbotToEurPerTon(val, commodity);
+    document.getElementById("conv-result").innerHTML = fmt2.format(eurT) + ' <span>€/t</span>';
+    document.getElementById("conv-formula").textContent =
+      "€/t = ($" + val + "/bu × " + FACTORS[commodity] + ") ÷ " + fmt4.format(state.eurusd) + " (EUR/USD)";
+  }
+
+  function renderAll() {
+    renderHeader();
+    renderChicago();
+    renderEuronext();
+    renderFisico();
+    renderSima();
+    renderSimaHistory();
+    renderConverter();
+  }
+
+  function loadData() {
+    return fetch("data.json?t=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        state = data;
+        renderAll();
+      })
+      .catch(function () { /* keep whatever is currently on screen */ });
+  }
+
+  populateConverter();
+  renderAll();
+  loadData();
+
+  document.getElementById("conv-value").addEventListener("input", renderConverter);
+  document.getElementById("conv-commodity").addEventListener("change", renderConverter);
+  document.getElementById("refresh-btn").addEventListener("click", loadData);
+})();
+</script>
+</body>
+</html>
