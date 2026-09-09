@@ -173,6 +173,12 @@
     align-items: start;
   }
 
+  .board-pair {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
   .board {
     background: var(--surface);
     border: 1px solid var(--line);
@@ -387,36 +393,38 @@
       <p class="board-note">Terre-net só dá o mês mais próximo (front-month) de cada cultura — por isso as outras datas ficam sem valor nessa coluna.</p>
     </div>
 
-    <div class="board">
-      <div class="board-head">
-        <h2>Físico</h2>
-        <span class="exchange-tag moss">€/t</span>
+    <div class="board-pair">
+      <div class="board">
+        <div class="board-head">
+          <h2>Físico</h2>
+          <span class="exchange-tag moss">€/t</span>
+        </div>
+        <div class="board-scroll">
+          <table class="board-table">
+            <thead>
+              <tr><th style="width:26%">Cultura</th><th style="width:50%">Praça</th><th style="width:24%">€/t</th></tr>
+            </thead>
+            <tbody id="fisico-body"></tbody>
+          </table>
+        </div>
+        <p class="board-note">Praças físicas francesas (Agritel + Terre-net) — referência europeia; não há cotação física diária pública para Portugal. "Trigo duro" é uma qualidade diferente do trigo mole cotado em Chicago/Euronext.</p>
       </div>
-      <div class="board-scroll">
-        <table class="board-table">
-          <thead>
-            <tr><th style="width:26%">Cultura</th><th style="width:50%">Praça</th><th style="width:24%">€/t</th></tr>
-          </thead>
-          <tbody id="fisico-body"></tbody>
-        </table>
-      </div>
-      <p class="board-note">Praças físicas francesas (Agritel + Terre-net) — referência europeia; não há cotação física diária pública para Portugal. "Trigo duro" é uma qualidade diferente do trigo mole cotado em Chicago/Euronext.</p>
-    </div>
 
-    <div class="board">
-      <div class="board-head">
-        <h2>SIMA (Portugal)</h2>
-        <span class="exchange-tag sima">€/T</span>
+      <div class="board">
+        <div class="board-head">
+          <h2>SIMA (Portugal)</h2>
+          <span class="exchange-tag sima">€/T</span>
+        </div>
+        <div class="board-scroll">
+          <table class="board-table">
+            <thead>
+              <tr><th style="width:40%">Cereal</th><th style="width:36%">Porto</th><th style="width:24%">€/t</th></tr>
+            </thead>
+            <tbody id="sima-body"></tbody>
+          </table>
+        </div>
+        <p class="board-note">Cereais importados, cotação semanal — fonte SIMA (GPP) / ACICO.</p>
       </div>
-      <div class="board-scroll">
-        <table class="board-table">
-          <thead>
-            <tr><th style="width:40%">Cereal</th><th style="width:36%">Porto</th><th style="width:24%">€/t</th></tr>
-          </thead>
-          <tbody id="sima-body"></tbody>
-        </table>
-      </div>
-      <p class="board-note">Cereais importados, cotação semanal — fonte SIMA (GPP) / ACICO.</p>
     </div>
 
   </div>
