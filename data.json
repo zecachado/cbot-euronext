@@ -1,6 +1,6 @@
 {
-  "updatedAt": "09/09 22:16",
-  "eurusd": 1.1639,
+  "updatedAt": "09/09 22:26",
+  "eurusd": 1.1637,
   "chicago": [
     {
       "name": "Milho",
@@ -97,7 +97,8 @@
     {
       "name": "Milho",
       "contract": "Nov-26",
-      "value": 265.0
+      "value": 265.0,
+      "terreNet": 265.0
     },
     {
       "name": "Milho",
@@ -122,7 +123,8 @@
     {
       "name": "Trigo mole",
       "contract": "Set-26",
-      "value": 234.25
+      "value": 234.25,
+      "terreNet": 234.25
     },
     {
       "name": "Trigo mole",
@@ -147,7 +149,8 @@
     {
       "name": "Colza",
       "contract": "Nov-26",
-      "value": 557.5
+      "value": 557.5,
+      "terreNet": 557.5
     },
     {
       "name": "Colza",
