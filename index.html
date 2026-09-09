@@ -152,6 +152,22 @@
   }
   .eurusd-pill span { color: var(--muted); }
 
+  .chart-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0;
+  }
+  .chart-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .chart-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
   button.ghost {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
@@ -390,6 +406,63 @@
   details.install li strong { color: var(--ink); }
 
   footer { text-align: center; font-size: 11px; color: var(--muted); padding-top: 4px; }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    z-index: 100;
+  }
+  .modal-overlay[hidden] { display: none; }
+  .modal-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 16px;
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .modal-head h2 { margin: 0; }
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px;
+  }
+  .modal-close:hover { color: var(--gold); }
+
+  .range-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .range-tab {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 5px 11px;
+    cursor: pointer;
+  }
+  .range-tab.active { background: var(--gold); border-color: var(--gold); color: var(--gold-ink); }
+
+  #eurusd-chart-svg { width: 100%; height: auto; display: block; }
+  #eurusd-chart-svg text { font-family: 'IBM Plex Mono', monospace; fill: var(--muted); font-size: 8px; }
 </style>
 </head>
 <body>
@@ -401,6 +474,11 @@
     <div class="updated-row">
       <span class="updated-text">Atualizado <strong id="updated-date">—</strong></span>
       <span class="eurusd-pill"><span>EUR/USD</span> <strong id="eurusd-value">—</strong></span>
+      <button class="chart-btn" id="eurusd-chart-btn" type="button" aria-label="Ver gráfico EUR/USD">
+        <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true">
+          <polyline points="2,15 7,9 11,12 18,4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></polyline>
+        </svg>
+      </button>
     </div>
     <div class="updated-row">
       <span class="updated-text">1 t milho = 39,368 bu · 1 t trigo/soja = 36,744 bu</span>
@@ -520,6 +598,22 @@
 
 </div>
 
+<div class="modal-overlay" id="eurusd-modal-overlay" hidden>
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2>EUR/USD</h2>
+      <button class="modal-close" id="eurusd-modal-close" type="button" aria-label="Fechar">✕</button>
+    </div>
+    <div class="range-tabs" id="eurusd-range-tabs">
+      <button class="range-tab" type="button" data-days="30">1 mês</button>
+      <button class="range-tab" type="button" data-days="90">3 meses</button>
+      <button class="range-tab" type="button" data-days="180">6 meses</button>
+      <button class="range-tab active" type="button" data-days="365">1 ano</button>
+    </div>
+    <svg id="eurusd-chart-svg" viewBox="0 0 400 220" role="img" aria-label="Evolução da cotação EUR/USD"></svg>
+  </div>
+</div>
+
 <script>
 (function () {
   "use strict";
@@ -534,7 +628,8 @@
     euronext: [],
     fisico: [],
     sima: [],
-    simaHistory: []
+    simaHistory: [],
+    eurusdHistory: []
   };
 
   var state = FALLBACK;
@@ -673,10 +768,75 @@
     updateActive();
   }
 
+  function renderEurusdChart(days) {
+    var svg = document.getElementById("eurusd-chart-svg");
+    var all = state.eurusdHistory || [];
+    var rows = days ? all.slice(-days) : all;
+    if (rows.length < 2) { svg.innerHTML = ""; return; }
+
+    var W = 400, H = 220, padL = 34, padR = 8, padT = 10, padB = 20;
+    var vals = rows.map(function (r) { return r.value; });
+    var vMin = Math.min.apply(null, vals), vMax = Math.max.apply(null, vals);
+    var vPad = (vMax - vMin) * 0.12 || 0.01;
+    vMin -= vPad; vMax += vPad;
+
+    function xScale(i) { return padL + (i / (rows.length - 1)) * (W - padL - padR); }
+    function yScale(v) { return H - padB - (v - vMin) / (vMax - vMin) * (H - padT - padB); }
+
+    var parts = [];
+    [vMin, (vMin + vMax) / 2, vMax].forEach(function (v) {
+      var y = yScale(v);
+      parts.push('<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padR) + '" y2="' + y + '" stroke="var(--line)" stroke-width="1" stroke-dasharray="2,3"></line>');
+      parts.push('<text x="' + (padL - 6) + '" y="' + (y + 3) + '" text-anchor="end">' + fmt4.format(v) + '</text>');
+    });
+
+    var labelStep = Math.max(1, Math.round(rows.length / 5));
+    rows.forEach(function (r, i) {
+      if (i === 0 || i === rows.length - 1 || i % labelStep === 0) {
+        parts.push('<text x="' + xScale(i) + '" y="' + (H - 5) + '" text-anchor="middle">' + r.date.slice(5) + '</text>');
+      }
+    });
+
+    var d = rows.map(function (r, i) { return (i === 0 ? "M" : "L") + xScale(i) + " " + yScale(r.value); }).join(" ");
+    parts.push('<path d="' + d + '" fill="none" stroke="var(--gold)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>');
+
+    var last = rows[rows.length - 1];
+    parts.push('<circle cx="' + xScale(rows.length - 1) + '" cy="' + yScale(last.value) + '" r="2.5" fill="var(--gold)"></circle>');
+
+    svg.innerHTML = parts.join("");
+  }
+
+  function initEurusdModal() {
+    var overlay = document.getElementById("eurusd-modal-overlay");
+    var btn = document.getElementById("eurusd-chart-btn");
+    var closeBtn = document.getElementById("eurusd-modal-close");
+    var rangeTabs = document.querySelectorAll("#eurusd-range-tabs .range-tab");
+
+    function open() {
+      overlay.hidden = false;
+      var active = document.querySelector("#eurusd-range-tabs .range-tab.active") || rangeTabs[rangeTabs.length - 1];
+      renderEurusdChart(parseInt(active.dataset.days, 10));
+    }
+    function close() { overlay.hidden = true; }
+
+    btn.addEventListener("click", open);
+    closeBtn.addEventListener("click", close);
+    overlay.addEventListener("click", function (e) { if (e.target === overlay) close(); });
+
+    rangeTabs.forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        rangeTabs.forEach(function (t) { t.classList.remove("active"); });
+        tab.classList.add("active");
+        renderEurusdChart(parseInt(tab.dataset.days, 10));
+      });
+    });
+  }
+
   populateConverter();
   renderAll();
   loadData();
   initBoardTabs();
+  initEurusdModal();
 
   document.getElementById("conv-value").addEventListener("input", renderConverter);
   document.getElementById("conv-commodity").addEventListener("change", renderConverter);
