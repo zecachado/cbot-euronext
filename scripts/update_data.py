@@ -98,6 +98,22 @@ def fetch_eurusd():
     return fetch_yahoo_price("EURUSD=X")
 
 
+def fetch_eurusd_history():
+    url = "https://query1.finance.yahoo.com/v8/finance/chart/EURUSD=X?range=1y&interval=1d"
+    r = requests.get(url, headers=HEADERS, timeout=20)
+    r.raise_for_status()
+    result = r.json()["chart"]["result"][0]
+    timestamps = result["timestamp"]
+    closes = result["indicators"]["quote"][0]["close"]
+    history = []
+    for ts, close in zip(timestamps, closes):
+        if close is None:
+            continue
+        date = datetime.fromtimestamp(ts, tz=timezone.utc).strftime("%Y-%m-%d")
+        history.append({"date": date, "value": round(close, 4)})
+    return history
+
+
 # --------------------------------------------------------------- Euronext --
 
 AGRITEL_CODE_TO_CROP = {"EMA": "Milho", "EBM": "Trigo mole", "ECO": "Colza"}
@@ -302,6 +318,13 @@ def main():
         log(f"  eurusd -> {data['eurusd']}")
     except Exception as exc:
         log(f"  eurusd FAILED: {exc}")
+
+    log("Fetching EUR/USD 1y history (Yahoo Finance)...")
+    try:
+        data["eurusdHistory"] = fetch_eurusd_history()
+        log(f"  eurusdHistory -> {len(data['eurusdHistory'])} points")
+    except Exception as exc:
+        log(f"  eurusdHistory FAILED: {exc}")
 
     log("Fetching Euronext + Fisico (agritel.com)...")
     try:
