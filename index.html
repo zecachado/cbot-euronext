@@ -173,7 +173,39 @@
     align-items: start;
   }
 
+  .board-tabs { display: none; }
+
   @media (max-width: 680px) {
+    .board-tabs {
+      display: flex;
+      margin: 0 -16px 10px;
+      padding: 0 10px;
+      border-bottom: 1px solid var(--line);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .board-tabs::-webkit-scrollbar { display: none; }
+    .board-tab {
+      flex: 1 0 auto;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      padding: 10px 8px 8px;
+      margin-bottom: -1px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .board-tab.active {
+      color: var(--tab-color, var(--ink));
+      border-bottom-color: var(--tab-color, var(--ink));
+      font-weight: 600;
+    }
+
     .boards {
       display: flex;
       gap: 0;
@@ -182,13 +214,14 @@
       scroll-snap-type: x mandatory;
       scroll-behavior: smooth;
       margin: 0 -16px;
-      padding: 0 16px;
       scrollbar-width: none;
     }
     .boards::-webkit-scrollbar { display: none; }
     .boards > .board {
       flex: 0 0 100%;
       width: 100%;
+      box-sizing: border-box;
+      padding: 0 16px;
       scroll-snap-align: start;
       scroll-snap-stop: always;
     }
@@ -375,7 +408,14 @@
     </div>
   </header>
 
-  <div class="boards">
+  <div class="board-tabs" id="board-tabs" role="tablist">
+    <button class="board-tab" type="button" style="--tab-color: var(--gold)">Chicago</button>
+    <button class="board-tab" type="button" style="--tab-color: var(--blue)">Euronext</button>
+    <button class="board-tab" type="button" style="--tab-color: var(--moss)">Físico</button>
+    <button class="board-tab" type="button" style="--tab-color: var(--sima)">SIMA</button>
+  </div>
+
+  <div class="boards" id="boards-scroller">
 
     <div class="board">
       <div class="board-head">
@@ -608,9 +648,35 @@
       .catch(function () { /* keep whatever is currently on screen */ });
   }
 
+  function initBoardTabs() {
+    var scroller = document.getElementById("boards-scroller");
+    var tabs = document.querySelectorAll(".board-tab");
+    var boards = scroller.querySelectorAll(":scope > .board");
+    if (!tabs.length || !boards.length) return;
+
+    tabs.forEach(function (tab, i) {
+      tab.addEventListener("click", function () {
+        boards[i].scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
+      });
+    });
+
+    var ticking = false;
+    function updateActive() {
+      ticking = false;
+      var idx = Math.round(scroller.scrollLeft / scroller.clientWidth);
+      idx = Math.max(0, Math.min(boards.length - 1, idx));
+      tabs.forEach(function (t, i) { t.classList.toggle("active", i === idx); });
+    }
+    scroller.addEventListener("scroll", function () {
+      if (!ticking) { ticking = true; requestAnimationFrame(updateActive); }
+    });
+    updateActive();
+  }
+
   populateConverter();
   renderAll();
   loadData();
+  initBoardTabs();
 
   document.getElementById("conv-value").addEventListener("input", renderConverter);
   document.getElementById("conv-commodity").addEventListener("change", renderConverter);
