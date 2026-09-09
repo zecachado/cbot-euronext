@@ -391,11 +391,12 @@
       <div class="board-scroll">
         <table class="board-table">
           <thead>
-            <tr><th style="width:34%">Cultura</th><th style="width:32%">Data</th><th style="width:34%">€/t</th></tr>
+            <tr><th style="width:26%">Cultura</th><th style="width:20%">Data</th><th style="width:27%">Terre-net</th><th style="width:27%">€/t</th></tr>
           </thead>
           <tbody id="euronext-body"></tbody>
         </table>
       </div>
+      <p class="board-note">Terre-net só dá o mês mais próximo (front-month) de cada cultura — por isso as outras datas ficam sem valor nessa coluna.</p>
     </div>
 
     <div class="board">
@@ -532,9 +533,13 @@
   function renderEuronext() {
     var el = document.getElementById("euronext-body");
     el.innerHTML = state.euronext.map(function (e, idx) {
+      var terreNetCell = (e.terreNet === null || e.terreNet === undefined)
+        ? '<td class="value muted-cell">–</td>'
+        : '<td class="value">' + fmt2.format(e.terreNet) + "</td>";
       return '<tr class="' + groupClass(state.euronext, idx, "name").trim() + '">' +
         '<td class="crop">' + e.name + "</td>" +
         '<td class="contract">' + e.contract + "</td>" +
+        terreNetCell +
         '<td class="value blue">' + fmt2.format(e.value) + "</td>" +
         "</tr>";
     }).join("");
