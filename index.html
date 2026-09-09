@@ -179,6 +179,28 @@
     gap: 16px;
   }
 
+  @media (max-width: 680px) {
+    .boards {
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      margin: 0 -16px;
+      padding: 0 16px;
+      scrollbar-width: none;
+    }
+    .boards::-webkit-scrollbar { display: none; }
+    .boards > .board,
+    .boards > .board-pair {
+      flex: 0 0 100%;
+      width: 100%;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }
+  }
+
   .board {
     background: var(--surface);
     border: 1px solid var(--line);
