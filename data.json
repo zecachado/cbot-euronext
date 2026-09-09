@@ -1,0 +1,66 @@
+{
+  "updatedAt": "09/09 21:48",
+  "eurusd": 1.1647,
+  "chicago": [
+    { "name": "Milho", "commodity": "corn", "contract": "Set-26", "value": 5.11 },
+    { "name": "Milho", "commodity": "corn", "contract": "Dez-26", "value": 5.335 },
+    { "name": "Milho", "commodity": "corn", "contract": "Mar-27", "value": 5.49 },
+    { "name": "Milho", "commodity": "corn", "contract": "Mai-27", "value": 5.545 },
+    { "name": "Milho", "commodity": "corn", "contract": "Jul-27", "value": 5.57 },
+    { "name": "Trigo", "commodity": "wheat", "contract": "Set-26", "value": 7.3025 },
+    { "name": "Trigo", "commodity": "wheat", "contract": "Dez-26", "value": 7.47 },
+    { "name": "Trigo", "commodity": "wheat", "contract": "Mar-27", "value": 7.615 },
+    { "name": "Trigo", "commodity": "wheat", "contract": "Mai-27", "value": 7.565 },
+    { "name": "Trigo", "commodity": "wheat", "contract": "Jul-27", "value": 7.52 },
+    { "name": "Soja", "commodity": "soybean", "contract": "Set-26", "value": 13.025 },
+    { "name": "Soja", "commodity": "soybean", "contract": "Nov-26", "value": 13.1625 },
+    { "name": "Soja", "commodity": "soybean", "contract": "Jan-27", "value": 13.32 },
+    { "name": "Soja", "commodity": "soybean", "contract": "Mar-27", "value": 13.3375 },
+    { "name": "Soja", "commodity": "soybean", "contract": "Mai-27", "value": 13.39 }
+  ],
+  "euronext": [
+    { "name": "Milho", "contract": "Nov-26", "value": 265 },
+    { "name": "Milho", "contract": "Mar-27", "value": 262.25 },
+    { "name": "Milho", "contract": "Jun-27", "value": 260.5 },
+    { "name": "Milho", "contract": "Ago-27", "value": 260 },
+    { "name": "Milho", "contract": "Nov-27", "value": 230.25 },
+    { "name": "Trigo mole", "contract": "Set-26", "value": 245 },
+    { "name": "Trigo mole", "contract": "Dez-26", "value": 244.75 },
+    { "name": "Trigo mole", "contract": "Mar-27", "value": 244.5 },
+    { "name": "Trigo mole", "contract": "Mai-27", "value": 245 },
+    { "name": "Trigo mole", "contract": "Set-27", "value": 234.5 },
+    { "name": "Colza", "contract": "Nov-26", "value": 557.5 },
+    { "name": "Colza", "contract": "Fev-27", "value": 559 },
+    { "name": "Colza", "contract": "Mai-27", "value": 557.75 },
+    { "name": "Colza", "contract": "Ago-27", "value": 525.5 },
+    { "name": "Colza", "contract": "Nov-27", "value": 526.5 }
+  ],
+  "fisico": [
+    { "name": "Milho", "local": "Bordeaux, base jul.", "value": 276.5 },
+    { "name": "Trigo mole", "local": "Rouen (Terre-net)", "value": 244 },
+    { "name": "Colza", "local": "FOB Moselle, colheita 26", "value": 559.5 },
+    { "name": "Trigo duro", "local": "La Pallice, base jul.", "value": 260 },
+    { "name": "Soja", "local": "sem mercado físico FR", "value": null }
+  ],
+  "sima": [
+    { "name": "Milho Forrageiro", "local": "Lisboa (sem. 35, 24-30/08)", "value": 250 },
+    { "name": "Cevada Forrageira", "local": "Lisboa (sem. 35, 24-30/08)", "value": 233 },
+    { "name": "Trigo Mole Forrageiro", "local": "Lisboa (sem. 35, 24-30/08)", "value": 253 },
+    { "name": "Trigo Mole Panificável", "local": "Lisboa (sem. 35, 24-30/08)", "value": 290 }
+  ],
+  "simaHistory": [
+    { "week": 23, "milho": 224.0, "cevada": 218.0, "trigoForr": 226.5, "trigoPanif": 235.0 },
+    { "week": 24, "milho": 220.0, "cevada": 214.0, "trigoForr": 225.0, "trigoPanif": 235.0 },
+    { "week": 25, "milho": 220.0, "cevada": 214.0, "trigoForr": 225.0, "trigoPanif": 241.0 },
+    { "week": 26, "milho": 226.0, "cevada": 219.0, "trigoForr": 225.0, "trigoPanif": 240.0 },
+    { "week": 27, "milho": 228.0, "cevada": 221.0, "trigoForr": 229.0, "trigoPanif": 245.0 },
+    { "week": 28, "milho": 231.5, "cevada": 222.5, "trigoForr": 231.0, "trigoPanif": 250.0 },
+    { "week": 29, "milho": 239.0, "cevada": 226.0, "trigoForr": 250.0, "trigoPanif": 275.0 },
+    { "week": 30, "milho": 239.0, "cevada": 228.5, "trigoForr": 248.5, "trigoPanif": 270.0 },
+    { "week": 31, "milho": 239.0, "cevada": 232.0, "trigoForr": 245.0, "trigoPanif": 270.0 },
+    { "week": 32, "milho": null, "cevada": null, "trigoForr": null, "trigoPanif": null },
+    { "week": 33, "milho": 238.0, "cevada": 226.0, "trigoForr": 240.0, "trigoPanif": 268.0 },
+    { "week": 34, "milho": 242.0, "cevada": 232.0, "trigoForr": 247.0, "trigoPanif": 270.0 },
+    { "week": 35, "milho": 250.0, "cevada": 233.0, "trigoForr": 253.0, "trigoPanif": 290.0 }
+  ]
+}
