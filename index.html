@@ -314,6 +314,9 @@
   table.board-table tr:last-child td { border-bottom: none; }
   table.board-table tr.group-start td { border-top: 2px solid var(--muted); }
   table.board-table td.crop { text-align: left; color: var(--ink); font-weight: 500; white-space: nowrap; overflow-wrap: normal; }
+  table.board-table td.crop-stack { line-height: 1.5; }
+  table.board-table td.crop-stack strong { display: block; color: var(--ink); font-weight: 500; }
+  table.board-table td.crop-stack span { display: block; color: var(--muted); font-size: 9.5px; }
   table.board-table td.contract { text-align: left; color: var(--muted); font-size: 9.5px; white-space: nowrap; overflow-wrap: normal; }
   table.board-table td.local-cell { text-align: left; color: var(--muted); font-size: 9.5px; white-space: normal; line-height: 1.3; }
   table.board-table td.value { color: var(--ink); font-weight: 600; white-space: nowrap; overflow-wrap: normal; }
@@ -478,7 +481,7 @@
   #history-chart-svg text { font-family: 'IBM Plex Mono', monospace; fill: var(--muted); font-size: 8px; }
   .modal-empty { font-size: 12.5px; color: var(--muted); text-align: center; margin: 0; padding: 20px 8px; }
 
-  .chart-cell { display: flex; align-items: center; justify-content: flex-end; gap: 2px; }
+  .chart-cell { white-space: nowrap; }
   .row-chart-btn {
     display: inline-flex;
     align-items: center;
@@ -486,11 +489,12 @@
     width: 13px;
     height: 13px;
     padding: 0;
+    margin-left: 2px;
+    vertical-align: middle;
     background: none;
     border: none;
     color: var(--muted);
     cursor: pointer;
-    flex: 0 0 auto;
   }
   .row-chart-btn:hover { color: var(--gold); }
   .row-chart-btn svg { width: 10px; height: 10px; }
@@ -534,7 +538,7 @@
       <div class="board-scroll">
         <table class="board-table">
           <thead>
-            <tr><th style="width:16%">Cultura</th><th style="width:15%">Data</th><th style="width:24%">$/bu</th><th style="width:20%">Var.</th><th style="width:25%">€/t</th></tr>
+            <tr><th style="width:26%">Contrato</th><th style="width:25%">$/bu</th><th style="width:22%">Var.</th><th style="width:27%">€/t</th></tr>
           </thead>
           <tbody id="chicago-body"></tbody>
         </table>
@@ -549,7 +553,7 @@
       <div class="board-scroll">
         <table class="board-table">
           <thead>
-            <tr><th style="width:22%">Cultura</th><th style="width:20%">Data</th><th style="width:29%">€/t</th><th style="width:29%">Var.</th></tr>
+            <tr><th style="width:34%">Contrato</th><th style="width:33%">€/t</th><th style="width:33%">Var.</th></tr>
           </thead>
           <tbody id="euronext-body"></tbody>
         </table>
@@ -700,11 +704,10 @@
     el.innerHTML = state.chicago.map(function (c, idx) {
       var eurT = cbotToEurPerTon(c.value, c.commodity);
       return '<tr class="' + groupClass(state.chicago, idx, "name").trim() + '">' +
-        '<td class="crop">' + c.name + "</td>" +
-        '<td class="contract">' + c.contract + "</td>" +
+        '<td class="crop-stack"><strong>' + c.name + "</strong><span>" + c.contract + "</span></td>" +
         '<td class="value gold">' + fmt4.format(c.value) + "</td>" +
         changeBadgeCell(c.change, fmt2) +
-        '<td class="value chart-cell"><span>' + fmt2.format(eurT) + "</span>" + rowChartBtn("chicago", idx) + "</td>" +
+        '<td class="value chart-cell">' + fmt2.format(eurT) + rowChartBtn("chicago", idx) + "</td>" +
         "</tr>";
     }).join("");
   }
@@ -713,9 +716,8 @@
     var el = document.getElementById("euronext-body");
     el.innerHTML = state.euronext.map(function (e, idx) {
       return '<tr class="' + groupClass(state.euronext, idx, "name").trim() + '">' +
-        '<td class="crop">' + e.name + "</td>" +
-        '<td class="contract">' + e.contract + "</td>" +
-        '<td class="value blue chart-cell"><span>' + fmt2.format(e.value) + "</span>" + rowChartBtn("euronext", idx) + "</td>" +
+        '<td class="crop-stack"><strong>' + e.name + "</strong><span>" + e.contract + "</span></td>" +
+        '<td class="value blue chart-cell">' + fmt2.format(e.value) + rowChartBtn("euronext", idx) + "</td>" +
         changeBadgeCell(e.change, fmt2) +
         "</tr>";
     }).join("");
