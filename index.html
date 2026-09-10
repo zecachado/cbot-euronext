@@ -110,6 +110,21 @@
     border-bottom: 1px solid var(--line);
   }
 
+  .header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .header-logo-wrap {
+    flex: 0 0 auto;
+    background: #ffffff;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 4px 8px;
+  }
+  .header-logo { display: block; height: 34px; width: auto; }
+
   .eyebrow {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
@@ -505,8 +520,13 @@
 <div class="page">
 
   <header class="top">
-    <span class="eyebrow">Cereais &amp; oleaginosas · quadro Chicago · Euronext · Físico · SIMA</span>
-    <h1>CBOT × Euronext</h1>
+    <div class="header-row">
+      <div>
+        <span class="eyebrow">Cereais &amp; oleaginosas · quadro Chicago · Euronext · Físico · SIMA</span>
+        <h1>CBOT × Euronext</h1>
+      </div>
+      <div class="header-logo-wrap"><img src="cerpro-logo.png" alt="CERPRO" class="header-logo"></div>
+    </div>
     <div class="updated-row">
       <span class="updated-text">Atualizado <strong id="updated-date">—</strong></span>
       <span class="eurusd-pill"><span>EUR/USD</span> <strong id="eurusd-value">—</strong></span>
