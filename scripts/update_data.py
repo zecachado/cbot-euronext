@@ -62,12 +62,19 @@ def next_contracts(cycle, today, count=5):
 
 # ---------------------------------------------------------------- Chicago --
 
-def fetch_yahoo_price(symbol):
+def fetch_yahoo_quote(symbol):
     url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
     r = requests.get(url, headers=HEADERS, timeout=15)
     r.raise_for_status()
     meta = r.json()["chart"]["result"][0]["meta"]
-    return meta["regularMarketPrice"]
+    price = meta["regularMarketPrice"]
+    prev_close = meta.get("previousClose", meta.get("chartPreviousClose"))
+    change = (price - prev_close) if prev_close is not None else None
+    return price, change
+
+
+def fetch_yahoo_price(symbol):
+    return fetch_yahoo_quote(symbol)[0]
 
 
 def fetch_chicago(today):
@@ -81,14 +88,17 @@ def fetch_chicago(today):
         for year, mm, letter in next_contracts(cycle, today):
             symbol = f"{root}{letter}{year % 100:02d}.CBT"
             try:
-                price_cents = fetch_yahoo_price(symbol)
-                rows.append({
+                price_cents, change_cents = fetch_yahoo_quote(symbol)
+                row = {
                     "name": name,
                     "commodity": commodity,
                     "contract": contract_label(mm, year),
                     "value": round(price_cents / 100.0, 4),
-                })
-                log(f"  chicago {symbol} -> {price_cents}")
+                }
+                if change_cents is not None:
+                    row["change"] = round(change_cents / 100.0, 4)
+                rows.append(row)
+                log(f"  chicago {symbol} -> {price_cents} (change {change_cents})")
             except Exception as exc:
                 log(f"  chicago {symbol} FAILED: {exc}")
     return rows
@@ -126,6 +136,9 @@ def fetch_agritel_html():
 
 
 def fetch_euronext(html):
+    var_pattern = re.compile(r"id='([A-Z]{3}[A-Z]{3}\d{2})_VAR'[^>]*>([+-]?[\d.]+)")
+    changes = {key: float(v) for key, v in var_pattern.findall(html)}
+
     rows = []
     pattern = re.compile(r"id='([A-Z]{3})([A-Z]{3})(\d{2})_VALUE'[^>]*>([\d.]+)")
     for code, mon, yy, value in pattern.findall(html):
@@ -134,12 +147,16 @@ def fetch_euronext(html):
         if not crop or not month_num:
             continue
         year = 2000 + int(yy)
-        rows.append({
+        row = {
             "name": crop,
             "contract": contract_label(month_num, year),
             "value": float(value),
-        })
-        log(f"  euronext {code}{mon}{yy} -> {value}")
+        }
+        change = changes.get(f"{code}{mon}{yy}")
+        if change is not None:
+            row["change"] = change
+        rows.append(row)
+        log(f"  euronext {code}{mon}{yy} -> {value} (change {change})")
     return rows
 
 
