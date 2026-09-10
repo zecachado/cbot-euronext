@@ -327,8 +327,8 @@
     display: inline-block;
     font-variant-numeric: tabular-nums;
     font-weight: 600;
-    font-size: 10.5px;
-    padding: 2px 6px;
+    font-size: 10px;
+    padding: 2px 4px;
     border-radius: 5px;
     white-space: nowrap;
   }
@@ -474,8 +474,25 @@
   }
   .range-tab.active { background: var(--gold); border-color: var(--gold); color: var(--gold-ink); }
 
-  #eurusd-chart-svg { width: 100%; height: auto; display: block; }
-  #eurusd-chart-svg text { font-family: 'IBM Plex Mono', monospace; fill: var(--muted); font-size: 8px; }
+  #history-chart-svg { width: 100%; height: auto; display: block; }
+  #history-chart-svg text { font-family: 'IBM Plex Mono', monospace; fill: var(--muted); font-size: 8px; }
+  .modal-empty { font-size: 12.5px; color: var(--muted); text-align: center; margin: 0; padding: 20px 8px; }
+
+  .chart-cell { display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+  .row-chart-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    flex: 0 0 auto;
+  }
+  .row-chart-btn:hover { color: var(--gold); }
 </style>
 </head>
 <body>
@@ -516,7 +533,7 @@
       <div class="board-scroll">
         <table class="board-table">
           <thead>
-            <tr><th style="width:20%">Cultura</th><th style="width:17%">Data</th><th style="width:21%">$/bu</th><th style="width:19%">Var.</th><th style="width:23%">€/t</th></tr>
+            <tr><th style="width:16%">Cultura</th><th style="width:15%">Data</th><th style="width:24%">$/bu</th><th style="width:20%">Var.</th><th style="width:25%">€/t</th></tr>
           </thead>
           <tbody id="chicago-body"></tbody>
         </table>
@@ -531,7 +548,7 @@
       <div class="board-scroll">
         <table class="board-table">
           <thead>
-            <tr><th style="width:28%">Cultura</th><th style="width:24%">Data</th><th style="width:24%">€/t</th><th style="width:24%">Var.</th></tr>
+            <tr><th style="width:22%">Cultura</th><th style="width:20%">Data</th><th style="width:29%">€/t</th><th style="width:29%">Var.</th></tr>
           </thead>
           <tbody id="euronext-body"></tbody>
         </table>
@@ -610,19 +627,20 @@
 
 </div>
 
-<div class="modal-overlay" id="eurusd-modal-overlay" hidden>
+<div class="modal-overlay" id="history-modal-overlay" hidden>
   <div class="modal-card">
     <div class="modal-head">
-      <h2>EUR/USD</h2>
-      <button class="modal-close" id="eurusd-modal-close" type="button" aria-label="Fechar">✕</button>
+      <h2 id="history-modal-title">—</h2>
+      <button class="modal-close" id="history-modal-close" type="button" aria-label="Fechar">✕</button>
     </div>
-    <div class="range-tabs" id="eurusd-range-tabs">
+    <div class="range-tabs" id="history-range-tabs">
       <button class="range-tab" type="button" data-days="30">1 mês</button>
       <button class="range-tab" type="button" data-days="90">3 meses</button>
       <button class="range-tab" type="button" data-days="180">6 meses</button>
       <button class="range-tab active" type="button" data-days="365">1 ano</button>
     </div>
-    <svg id="eurusd-chart-svg" viewBox="0 0 400 220" role="img" aria-label="Evolução da cotação EUR/USD"></svg>
+    <svg id="history-chart-svg" viewBox="0 0 400 220" role="img" aria-label="Evolução histórica"></svg>
+    <p class="modal-empty" id="history-empty" hidden>Ainda não há histórico suficiente para este contrato — vai sendo construído dia a dia.</p>
   </div>
 </div>
 
@@ -669,6 +687,13 @@
     return '<td><span class="change-badge ' + dir + '">' + sign + fmt.format(change) + "</span></td>";
   }
 
+  function rowChartBtn(board, idx) {
+    return '<button class="row-chart-btn" type="button" data-board="' + board + '" data-idx="' + idx +
+      '" aria-label="Ver histórico"><svg viewBox="0 0 20 20" width="12" height="12" aria-hidden="true">' +
+      '<polyline points="2,15 7,9 11,12 18,4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>' +
+      "</svg></button>";
+  }
+
   function renderChicago() {
     var el = document.getElementById("chicago-body");
     el.innerHTML = state.chicago.map(function (c, idx) {
@@ -677,8 +702,8 @@
         '<td class="crop">' + c.name + "</td>" +
         '<td class="contract">' + c.contract + "</td>" +
         '<td class="value gold">' + fmt4.format(c.value) + "</td>" +
-        changeBadgeCell(c.change, fmt4) +
-        '<td class="value">' + fmt2.format(eurT) + "</td>" +
+        changeBadgeCell(c.change, fmt2) +
+        '<td class="value chart-cell"><span>' + fmt2.format(eurT) + "</span>" + rowChartBtn("chicago", idx) + "</td>" +
         "</tr>";
     }).join("");
   }
@@ -689,7 +714,7 @@
       return '<tr class="' + groupClass(state.euronext, idx, "name").trim() + '">' +
         '<td class="crop">' + e.name + "</td>" +
         '<td class="contract">' + e.contract + "</td>" +
-        '<td class="value blue">' + fmt2.format(e.value) + "</td>" +
+        '<td class="value blue chart-cell"><span>' + fmt2.format(e.value) + "</span>" + rowChartBtn("euronext", idx) + "</td>" +
         changeBadgeCell(e.change, fmt2) +
         "</tr>";
     }).join("");
@@ -785,16 +810,22 @@
     updateActive();
   }
 
-  function renderEurusdChart(days) {
-    var svg = document.getElementById("eurusd-chart-svg");
-    var all = state.eurusdHistory || [];
-    var rows = days ? all.slice(-days) : all;
-    if (rows.length < 2) { svg.innerHTML = ""; return; }
+  var activeHistory = [];
+  var activeColor = "var(--gold)";
+  var activeFmt = fmt4;
 
-    var W = 400, H = 220, padL = 34, padR = 8, padT = 10, padB = 20;
+  function renderHistoryChart(days) {
+    var svg = document.getElementById("history-chart-svg");
+    var empty = document.getElementById("history-empty");
+    var all = activeHistory || [];
+    var rows = days ? all.slice(-days) : all;
+    if (rows.length < 2) { svg.innerHTML = ""; svg.hidden = true; empty.hidden = false; return; }
+    svg.hidden = false; empty.hidden = true;
+
+    var W = 400, H = 220, padL = 40, padR = 8, padT = 10, padB = 20;
     var vals = rows.map(function (r) { return r.value; });
     var vMin = Math.min.apply(null, vals), vMax = Math.max.apply(null, vals);
-    var vPad = (vMax - vMin) * 0.12 || 0.01;
+    var vPad = (vMax - vMin) * 0.12 || vMax * 0.02 || 0.01;
     vMin -= vPad; vMax += vPad;
 
     function xScale(i) { return padL + (i / (rows.length - 1)) * (W - padL - padR); }
@@ -804,7 +835,7 @@
     [vMin, (vMin + vMax) / 2, vMax].forEach(function (v) {
       var y = yScale(v);
       parts.push('<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padR) + '" y2="' + y + '" stroke="var(--line)" stroke-width="1" stroke-dasharray="2,3"></line>');
-      parts.push('<text x="' + (padL - 6) + '" y="' + (y + 3) + '" text-anchor="end">' + fmt4.format(v) + '</text>');
+      parts.push('<text x="' + (padL - 6) + '" y="' + (y + 3) + '" text-anchor="end">' + activeFmt.format(v) + '</text>');
     });
 
     var labelStep = Math.max(1, Math.round(rows.length / 5));
@@ -815,28 +846,31 @@
     });
 
     var d = rows.map(function (r, i) { return (i === 0 ? "M" : "L") + xScale(i) + " " + yScale(r.value); }).join(" ");
-    parts.push('<path d="' + d + '" fill="none" stroke="var(--gold)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>');
+    parts.push('<path d="' + d + '" fill="none" stroke="' + activeColor + '" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>');
 
     var last = rows[rows.length - 1];
-    parts.push('<circle cx="' + xScale(rows.length - 1) + '" cy="' + yScale(last.value) + '" r="2.5" fill="var(--gold)"></circle>');
+    parts.push('<circle cx="' + xScale(rows.length - 1) + '" cy="' + yScale(last.value) + '" r="2.5" fill="' + activeColor + '"></circle>');
 
     svg.innerHTML = parts.join("");
   }
 
-  function initEurusdModal() {
-    var overlay = document.getElementById("eurusd-modal-overlay");
-    var btn = document.getElementById("eurusd-chart-btn");
-    var closeBtn = document.getElementById("eurusd-modal-close");
-    var rangeTabs = document.querySelectorAll("#eurusd-range-tabs .range-tab");
+  function openHistoryModal(title, history, color, fmt) {
+    activeHistory = history || [];
+    activeColor = color;
+    activeFmt = fmt;
+    document.getElementById("history-modal-title").textContent = title;
+    document.getElementById("history-modal-overlay").hidden = false;
+    var rangeTabs = document.querySelectorAll("#history-range-tabs .range-tab");
+    var active = document.querySelector("#history-range-tabs .range-tab.active") || rangeTabs[rangeTabs.length - 1];
+    renderHistoryChart(parseInt(active.dataset.days, 10));
+  }
 
-    function open() {
-      overlay.hidden = false;
-      var active = document.querySelector("#eurusd-range-tabs .range-tab.active") || rangeTabs[rangeTabs.length - 1];
-      renderEurusdChart(parseInt(active.dataset.days, 10));
-    }
+  function initHistoryModal() {
+    var overlay = document.getElementById("history-modal-overlay");
+    var closeBtn = document.getElementById("history-modal-close");
+    var rangeTabs = document.querySelectorAll("#history-range-tabs .range-tab");
+
     function close() { overlay.hidden = true; }
-
-    btn.addEventListener("click", open);
     closeBtn.addEventListener("click", close);
     overlay.addEventListener("click", function (e) { if (e.target === overlay) close(); });
 
@@ -844,8 +878,26 @@
       tab.addEventListener("click", function () {
         rangeTabs.forEach(function (t) { t.classList.remove("active"); });
         tab.classList.add("active");
-        renderEurusdChart(parseInt(tab.dataset.days, 10));
+        renderHistoryChart(parseInt(tab.dataset.days, 10));
       });
+    });
+
+    document.getElementById("eurusd-chart-btn").addEventListener("click", function () {
+      openHistoryModal("EUR/USD", state.eurusdHistory, "var(--gold)", fmt4);
+    });
+
+    document.getElementById("boards-scroller").addEventListener("click", function (e) {
+      var btn = e.target.closest(".row-chart-btn");
+      if (!btn) return;
+      var board = btn.dataset.board;
+      var idx = parseInt(btn.dataset.idx, 10);
+      if (board === "chicago") {
+        var c = state.chicago[idx];
+        openHistoryModal(c.name + " " + c.contract, c.history, "var(--gold)", fmt2);
+      } else if (board === "euronext") {
+        var eu = state.euronext[idx];
+        openHistoryModal(eu.name + " " + eu.contract, eu.history, "var(--blue)", fmt2);
+      }
     });
   }
 
@@ -853,7 +905,7 @@
   renderAll();
   loadData();
   initBoardTabs();
-  initEurusdModal();
+  initHistoryModal();
 
   document.getElementById("conv-value").addEventListener("input", renderConverter);
   document.getElementById("conv-commodity").addEventListener("change", renderConverter);
