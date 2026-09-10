@@ -62,19 +62,31 @@ def next_contracts(cycle, today, count=5):
 
 # ---------------------------------------------------------------- Chicago --
 
-def fetch_yahoo_quote(symbol):
-    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
-    r = requests.get(url, headers=HEADERS, timeout=15)
+def fetch_yahoo_chart(symbol, range_="1y", interval="1d"):
+    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?range={range_}&interval={interval}"
+    r = requests.get(url, headers=HEADERS, timeout=20)
     r.raise_for_status()
-    meta = r.json()["chart"]["result"][0]["meta"]
+    result = r.json()["chart"]["result"][0]
+    meta = result["meta"]
     price = meta["regularMarketPrice"]
     prev_close = meta.get("previousClose", meta.get("chartPreviousClose"))
     change = (price - prev_close) if prev_close is not None else None
-    return price, change
+
+    history = []
+    timestamps = result.get("timestamp") or []
+    closes = result.get("indicators", {}).get("quote", [{}])[0].get("close") or []
+    for ts, close in zip(timestamps, closes):
+        if close is None:
+            continue
+        date = datetime.fromtimestamp(ts, tz=timezone.utc).strftime("%Y-%m-%d")
+        history.append({"date": date, "value": round(close, 4)})
+
+    return price, change, history
 
 
 def fetch_yahoo_price(symbol):
-    return fetch_yahoo_quote(symbol)[0]
+    price, _, _ = fetch_yahoo_chart(symbol, range_="5d")
+    return price
 
 
 def fetch_chicago(today):
@@ -88,7 +100,7 @@ def fetch_chicago(today):
         for year, mm, letter in next_contracts(cycle, today):
             symbol = f"{root}{letter}{year % 100:02d}.CBT"
             try:
-                price_cents, change_cents = fetch_yahoo_quote(symbol)
+                price_cents, change_cents, history_cents = fetch_yahoo_chart(symbol)
                 row = {
                     "name": name,
                     "commodity": commodity,
@@ -97,31 +109,15 @@ def fetch_chicago(today):
                 }
                 if change_cents is not None:
                     row["change"] = round(change_cents / 100.0, 4)
+                if history_cents:
+                    row["history"] = [{"date": h["date"], "value": round(h["value"] / 100.0, 4)} for h in history_cents]
                 rows.append(row)
-                log(f"  chicago {symbol} -> {price_cents} (change {change_cents})")
+                log(f"  chicago {symbol} -> {price_cents} (change {change_cents}, {len(history_cents)} pts)")
             except Exception as exc:
                 log(f"  chicago {symbol} FAILED: {exc}")
     return rows
 
 
-def fetch_eurusd():
-    return fetch_yahoo_price("EURUSD=X")
-
-
-def fetch_eurusd_history():
-    url = "https://query1.finance.yahoo.com/v8/finance/chart/EURUSD=X?range=1y&interval=1d"
-    r = requests.get(url, headers=HEADERS, timeout=20)
-    r.raise_for_status()
-    result = r.json()["chart"]["result"][0]
-    timestamps = result["timestamp"]
-    closes = result["indicators"]["quote"][0]["close"]
-    history = []
-    for ts, close in zip(timestamps, closes):
-        if close is None:
-            continue
-        date = datetime.fromtimestamp(ts, tz=timezone.utc).strftime("%Y-%m-%d")
-        history.append({"date": date, "value": round(close, 4)})
-    return history
 
 
 # --------------------------------------------------------------- Euronext --
@@ -308,25 +304,28 @@ def main():
     if fresh_chicago:
         data["chicago"] = sort_chicago(merge_rows(data.get("chicago", []), fresh_chicago, ("name", "contract")))
 
-    log("Fetching EUR/USD (Yahoo Finance)...")
+    log("Fetching EUR/USD + 1y history (Yahoo Finance)...")
     try:
-        data["eurusd"] = round(fetch_eurusd(), 4)
-        log(f"  eurusd -> {data['eurusd']}")
+        eurusd_price, _, eurusd_history = fetch_yahoo_chart("EURUSD=X", range_="1y")
+        data["eurusd"] = round(eurusd_price, 4)
+        data["eurusdHistory"] = eurusd_history
+        log(f"  eurusd -> {data['eurusd']}, {len(eurusd_history)} history points")
     except Exception as exc:
         log(f"  eurusd FAILED: {exc}")
-
-    log("Fetching EUR/USD 1y history (Yahoo Finance)...")
-    try:
-        data["eurusdHistory"] = fetch_eurusd_history()
-        log(f"  eurusdHistory -> {len(data['eurusdHistory'])} points")
-    except Exception as exc:
-        log(f"  eurusdHistory FAILED: {exc}")
 
     log("Fetching Euronext + Fisico (agritel.com)...")
     try:
         html = fetch_agritel_html()
         fresh_euronext = fetch_euronext(html)
         if fresh_euronext:
+            today_str = today.strftime("%Y-%m-%d")
+            old_history_by_key = {(r["name"], r["contract"]): r.get("history", []) for r in data.get("euronext", [])}
+            for row in fresh_euronext:
+                key = (row["name"], row["contract"])
+                history = list(old_history_by_key.get(key, []))
+                if not history or history[-1]["date"] != today_str:
+                    history.append({"date": today_str, "value": row["value"]})
+                row["history"] = history[-400:]
             data["euronext"] = sort_euronext(merge_rows(data.get("euronext", []), fresh_euronext, ("name", "contract")))
         fresh_fisico_a = fetch_fisico_agritel(html)
         if fresh_fisico_a:
