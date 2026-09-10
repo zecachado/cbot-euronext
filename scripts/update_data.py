@@ -69,8 +69,6 @@ def fetch_yahoo_chart(symbol, range_="1y", interval="1d"):
     result = r.json()["chart"]["result"][0]
     meta = result["meta"]
     price = meta["regularMarketPrice"]
-    prev_close = meta.get("previousClose", meta.get("chartPreviousClose"))
-    change = (price - prev_close) if prev_close is not None else None
 
     history = []
     timestamps = result.get("timestamp") or []
@@ -81,12 +79,14 @@ def fetch_yahoo_chart(symbol, range_="1y", interval="1d"):
         date = datetime.fromtimestamp(ts, tz=timezone.utc).strftime("%Y-%m-%d")
         history.append({"date": date, "value": round(close, 4)})
 
+    # meta.previousClose/chartPreviousClose are unreliable on long ranges (can
+    # point to a stale value far from yesterday's session) - derive the day's
+    # change from the daily close series itself instead.
+    change = None
+    if len(history) >= 2:
+        change = price - history[-2]["value"]
+
     return price, change, history
-
-
-def fetch_yahoo_price(symbol):
-    price, _, _ = fetch_yahoo_chart(symbol, range_="5d")
-    return price
 
 
 def fetch_chicago(today):
