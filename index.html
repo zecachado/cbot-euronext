@@ -320,7 +320,7 @@
   table.board-table td.crop-stack span { display: block; color: var(--muted); font-size: 10.5px; }
   table.board-table td.contract { text-align: left; color: var(--muted); font-size: 11px; white-space: nowrap; overflow-wrap: normal; }
   table.board-table td.local-cell { text-align: left; color: var(--muted); font-size: 11px; white-space: normal; line-height: 1.4; }
-  table.board-table td.value { color: var(--ink); font-weight: 600; white-space: nowrap; overflow-wrap: normal; line-height: 1.7; }
+  table.board-table td.value { color: var(--ink); font-weight: 600; white-space: nowrap; overflow-wrap: normal; }
   table.board-table td.value.gold { color: var(--gold); }
   table.board-table td.value.blue { color: var(--blue); }
   table.board-table td.value.moss { color: var(--moss); }
@@ -539,7 +539,7 @@
       <div class="board-scroll">
         <table class="board-table">
           <thead>
-            <tr><th style="width:26%">Contrato</th><th style="width:25%">$/bu</th><th style="width:22%">Var.</th><th style="width:27%">€/t</th></tr>
+            <tr><th style="width:26%">Contrato</th><th style="width:19%">$/bu</th><th style="width:17%">Var.</th><th style="width:19%">€/t</th><th style="width:19%">Var.</th></tr>
           </thead>
           <tbody id="chicago-body"></tbody>
         </table>
@@ -714,8 +714,8 @@
         '<td class="crop-stack"><strong>' + c.name + "</strong><span>" + c.contract + "</span></td>" +
         '<td class="value gold">' + fmt4.format(c.value) + "</td>" +
         changeBadgeCell(c.change, fmt2) +
-        '<td class="value chart-cell"><span class="cell-line">' + fmt2.format(eurT) + rowChartBtn("chicago", idx) + "</span><br>" +
-        changeBadgeSpan(eurTChange, fmt2) + "</td>" +
+        '<td class="value chart-cell">' + fmt2.format(eurT) + rowChartBtn("chicago", idx) + "</td>" +
+        changeBadgeCell(eurTChange, fmt2) +
         "</tr>";
     }).join("");
   }
