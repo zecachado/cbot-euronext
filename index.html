@@ -289,22 +289,22 @@
     table-layout: fixed;
     border-collapse: collapse;
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 10.5px;
+    font-size: 12px;
   }
   table.board-table th {
     text-align: right;
-    font-size: 8.5px;
+    font-size: 9px;
     text-transform: uppercase;
     letter-spacing: 0.02em;
     color: var(--muted);
     font-weight: 500;
-    padding: 7px 3px;
+    padding: 8px 3px;
     border-bottom: 1px solid var(--line);
     overflow-wrap: break-word;
   }
   table.board-table th:first-child, table.board-table td:first-child { text-align: left; }
   table.board-table td {
-    padding: 7px 3px;
+    padding: 8px 3px;
     border-bottom: 1px solid var(--line);
     font-variant-numeric: tabular-nums;
     text-align: right;
@@ -313,25 +313,25 @@
   }
   table.board-table tr:last-child td { border-bottom: none; }
   table.board-table tr.group-start td { border-top: 2px solid var(--muted); }
-  table.board-table td.crop { text-align: left; color: var(--ink); font-weight: 500; white-space: nowrap; overflow-wrap: normal; }
-  table.board-table td.crop-stack { line-height: 1.5; }
-  table.board-table td.crop-stack strong { display: block; color: var(--ink); font-weight: 500; }
-  table.board-table td.crop-stack span { display: block; color: var(--muted); font-size: 9.5px; }
-  table.board-table td.contract { text-align: left; color: var(--muted); font-size: 9.5px; white-space: nowrap; overflow-wrap: normal; }
-  table.board-table td.local-cell { text-align: left; color: var(--muted); font-size: 9.5px; white-space: normal; line-height: 1.3; }
-  table.board-table td.value { color: var(--ink); font-weight: 600; white-space: nowrap; overflow-wrap: normal; }
+  table.board-table td.crop { text-align: left; color: var(--ink); font-weight: 500; white-space: normal; line-height: 1.3; }
+  table.board-table td.crop-stack { line-height: 1.6; }
+  table.board-table td.crop-stack strong { display: block; color: var(--ink); font-weight: 500; font-size: 12.5px; }
+  table.board-table td.crop-stack span { display: block; color: var(--muted); font-size: 10.5px; }
+  table.board-table td.contract { text-align: left; color: var(--muted); font-size: 11px; white-space: nowrap; overflow-wrap: normal; }
+  table.board-table td.local-cell { text-align: left; color: var(--muted); font-size: 11px; white-space: normal; line-height: 1.4; }
+  table.board-table td.value { color: var(--ink); font-weight: 600; white-space: nowrap; overflow-wrap: normal; line-height: 1.7; }
   table.board-table td.value.gold { color: var(--gold); }
   table.board-table td.value.blue { color: var(--blue); }
   table.board-table td.value.moss { color: var(--moss); }
   table.board-table td.value.sima { color: var(--sima); }
-  table.board-table td.muted-cell { color: var(--muted); font-weight: 400; font-style: italic; font-size: 9.5px; white-space: normal; }
+  table.board-table td.muted-cell { color: var(--muted); font-weight: 400; font-style: italic; font-size: 11px; white-space: normal; }
 
   .change-badge {
     display: inline-block;
     font-variant-numeric: tabular-nums;
     font-weight: 600;
-    font-size: 9px;
-    padding: 1.5px 3px;
+    font-size: 10px;
+    padding: 2px 4px;
     border-radius: 4px;
     white-space: nowrap;
   }
@@ -685,11 +685,16 @@
     return idx > 0 && rows[idx][key] !== rows[idx - 1][key] ? " group-start" : "";
   }
 
-  function changeBadgeCell(change, fmt) {
-    if (change === null || change === undefined) return '<td class="value muted-cell">–</td>';
+  function changeBadgeSpan(change, fmt) {
+    if (change === null || change === undefined) return "";
     var dir = change > 0 ? "up" : change < 0 ? "down" : "flat";
     var sign = change > 0 ? "+" : "";
-    return '<td><span class="change-badge ' + dir + '">' + sign + fmt.format(change) + "</span></td>";
+    return '<span class="change-badge ' + dir + '">' + sign + fmt.format(change) + "</span>";
+  }
+
+  function changeBadgeCell(change, fmt) {
+    if (change === null || change === undefined) return '<td class="value muted-cell">–</td>';
+    return "<td>" + changeBadgeSpan(change, fmt) + "</td>";
   }
 
   function rowChartBtn(board, idx) {
@@ -703,11 +708,13 @@
     var el = document.getElementById("chicago-body");
     el.innerHTML = state.chicago.map(function (c, idx) {
       var eurT = cbotToEurPerTon(c.value, c.commodity);
+      var eurTChange = (c.change === null || c.change === undefined) ? null : cbotToEurPerTon(c.change, c.commodity);
       return '<tr class="' + groupClass(state.chicago, idx, "name").trim() + '">' +
         '<td class="crop-stack"><strong>' + c.name + "</strong><span>" + c.contract + "</span></td>" +
         '<td class="value gold">' + fmt4.format(c.value) + "</td>" +
         changeBadgeCell(c.change, fmt2) +
-        '<td class="value chart-cell">' + fmt2.format(eurT) + rowChartBtn("chicago", idx) + "</td>" +
+        '<td class="value chart-cell"><span class="cell-line">' + fmt2.format(eurT) + rowChartBtn("chicago", idx) + "</span><br>" +
+        changeBadgeSpan(eurTChange, fmt2) + "</td>" +
         "</tr>";
     }).join("");
   }
