@@ -183,27 +183,6 @@ def fetch_fisico_terrenet(html):
     return []
 
 
-TERRENET_SLUG_TO_CROP = {"ble-tendre": "Trigo mole", "mais": "Milho", "colza": "Colza"}
-
-
-def fetch_euronext_terrenet(html):
-    rows = []
-    pattern = re.compile(
-        r'href="/marche-agricole/(ble-tendre|mais|colza)/terme">\s*[^<]*?(\d{2})/(\d{4})\s*</a>'
-        r'.*?float-end">\s*([\d.,]+)\s*(?:&#x20AC;|€)\s*/t',
-        re.S,
-    )
-    for slug, mm, yyyy, value in pattern.findall(html):
-        crop = TERRENET_SLUG_TO_CROP.get(slug)
-        month_num = int(mm)
-        if not crop or month_num not in PT_MONTH:
-            continue
-        contract = contract_label(month_num, int(yyyy))
-        rows.append({"name": crop, "contract": contract, "terreNet": float(value.replace(",", "."))})
-        log(f"  euronext terre-net {crop} {contract} -> {value}")
-    return rows
-
-
 # ------------------------------------------------------------------- SIMA --
 
 SIMA_CROPS = ["Milho Forrageiro", "Cevada Forrageira", "Trigo Mole Forrageiro", "Trigo Mole Panificável"]
@@ -338,17 +317,12 @@ def main():
     except Exception as exc:
         log(f"  agritel FAILED: {exc}")
 
-    log("Fetching Fisico + Euronext terre-net.fr reference...")
+    log("Fetching Fisico Ble tendre (terre-net.fr)...")
     try:
         terrenet_html = fetch_terrenet_html()
         fresh_fisico_t = fetch_fisico_terrenet(terrenet_html)
         if fresh_fisico_t:
             data["fisico"] = merge_rows(data.get("fisico", []), fresh_fisico_t, ("name", "local"))
-        fresh_euronext_t = fetch_euronext_terrenet(terrenet_html)
-        known_keys = {(r["name"], r["contract"]) for r in data.get("euronext", [])}
-        fresh_euronext_t = [r for r in fresh_euronext_t if (r["name"], r["contract"]) in known_keys]
-        if fresh_euronext_t:
-            data["euronext"] = sort_euronext(merge_rows(data.get("euronext", []), fresh_euronext_t, ("name", "contract")))
     except Exception as exc:
         log(f"  terre-net FAILED: {exc}")
 
