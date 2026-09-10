@@ -1,124 +1,144 @@
 {
-  "updatedAt": "09/09 23:43",
-  "eurusd": 1.164,
+  "updatedAt": "10/09 11:25",
+  "eurusd": 1.1636,
   "chicago": [
     {
       "name": "Milho",
       "commodity": "corn",
       "contract": "Set-26",
-      "value": 5.08
+      "value": 5.11,
+      "change": 0.0325
     },
     {
       "name": "Milho",
       "commodity": "corn",
       "contract": "Dez-26",
-      "value": 5.2825
+      "value": 5.3075,
+      "change": 0.03
     },
     {
       "name": "Milho",
       "commodity": "corn",
       "contract": "Mar-27",
-      "value": 5.44
+      "value": 5.4625,
+      "change": 0.03
     },
     {
       "name": "Milho",
       "commodity": "corn",
       "contract": "Mai-27",
-      "value": 5.515
+      "value": 5.54,
+      "change": 0.03
     },
     {
       "name": "Milho",
       "commodity": "corn",
       "contract": "Jul-27",
-      "value": 5.5475
+      "value": 5.5675,
+      "change": 0.0275
     },
     {
       "name": "Trigo",
       "commodity": "wheat",
       "contract": "Set-26",
-      "value": 7.175
+      "value": 7.1275,
+      "change": 0.015
     },
     {
       "name": "Trigo",
       "commodity": "wheat",
       "contract": "Dez-26",
-      "value": 7.2875
+      "value": 7.275,
+      "change": -0.0125
     },
     {
       "name": "Trigo",
       "commodity": "wheat",
       "contract": "Mar-27",
-      "value": 7.445
+      "value": 7.4325,
+      "change": -0.01
     },
     {
       "name": "Trigo",
       "commodity": "wheat",
       "contract": "Mai-27",
-      "value": 7.5225
+      "value": 7.505,
+      "change": -0.0125
     },
     {
       "name": "Trigo",
       "commodity": "wheat",
       "contract": "Jul-27",
-      "value": 7.47
+      "value": 7.465,
+      "change": 0.0025
     },
     {
       "name": "Soja",
       "commodity": "soybean",
       "contract": "Set-26",
-      "value": 12.98
+      "value": 12.98,
+      "change": 0.0275
     },
     {
       "name": "Soja",
       "commodity": "soybean",
       "contract": "Nov-26",
-      "value": 13.0875
+      "value": 13.1575,
+      "change": 0.0625
     },
     {
       "name": "Soja",
       "commodity": "soybean",
       "contract": "Jan-27",
-      "value": 13.245
+      "value": 13.3125,
+      "change": 0.06
     },
     {
       "name": "Soja",
       "commodity": "soybean",
       "contract": "Mar-27",
-      "value": 13.31
+      "value": 13.375,
+      "change": 0.0575
     },
     {
       "name": "Soja",
       "commodity": "soybean",
       "contract": "Mai-27",
-      "value": 13.3675
+      "value": 13.4275,
+      "change": 0.0575
     }
   ],
   "euronext": [
     {
       "name": "Milho",
       "contract": "Nov-26",
-      "value": 265.0,
-      "terreNet": 265.0
+      "value": 264.75,
+      "terreNet": 265.0,
+      "change": -0.25
     },
     {
       "name": "Milho",
       "contract": "Mar-27",
-      "value": 262.25
+      "value": 262.75,
+      "change": 0.5
     },
     {
       "name": "Milho",
       "contract": "Jun-27",
-      "value": 260.5
+      "value": 261.5,
+      "change": 1.0
     },
     {
       "name": "Milho",
       "contract": "Ago-27",
-      "value": 260.0
+      "value": 260.75,
+      "change": 0.25
     },
     {
       "name": "Milho",
       "contract": "Nov-27",
-      "value": 230.25
+      "value": 230.25,
+      "change": 0.0
     },
     {
       "name": "Trigo mole",
@@ -129,48 +149,63 @@
     {
       "name": "Trigo mole",
       "contract": "Dez-26",
-      "value": 244.75
+      "value": 243.75,
+      "change": -1.0
     },
     {
       "name": "Trigo mole",
       "contract": "Mar-27",
-      "value": 244.5
+      "value": 244.0,
+      "change": -0.5
     },
     {
       "name": "Trigo mole",
       "contract": "Mai-27",
-      "value": 245.0
+      "value": 244.5,
+      "change": -0.5
     },
     {
       "name": "Trigo mole",
       "contract": "Set-27",
-      "value": 234.5
+      "value": 234.0,
+      "change": -0.5
+    },
+    {
+      "name": "Trigo mole",
+      "contract": "Dez-27",
+      "value": 238.0,
+      "change": -0.5
     },
     {
       "name": "Colza",
       "contract": "Nov-26",
-      "value": 557.5,
-      "terreNet": 557.5
+      "value": 553.0,
+      "terreNet": 557.5,
+      "change": -4.5
     },
     {
       "name": "Colza",
       "contract": "Fev-27",
-      "value": 559.0
+      "value": 554.25,
+      "change": -4.75
     },
     {
       "name": "Colza",
       "contract": "Mai-27",
-      "value": 557.75
+      "value": 553.5,
+      "change": -4.25
     },
     {
       "name": "Colza",
       "contract": "Ago-27",
-      "value": 525.5
+      "value": 523.25,
+      "change": -2.25
     },
     {
       "name": "Colza",
       "contract": "Nov-27",
-      "value": 526.5
+      "value": 524.5,
+      "change": -2.0
     }
   ],
   "fisico": [
@@ -316,10 +351,6 @@
     }
   ],
   "eurusdHistory": [
-    {
-      "date": "2025-09-08",
-      "value": 1.1769
-    },
     {
       "date": "2025-09-09",
       "value": 1.1703
@@ -1357,8 +1388,8 @@
       "value": 1.1627
     },
     {
-      "date": "2026-09-09",
-      "value": 1.164
+      "date": "2026-09-10",
+      "value": 1.1636
     }
   ]
 }
